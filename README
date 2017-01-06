@@ -1,0 +1,6 @@
+# plusminus
+
+CODE folder
+data import/clean.py: cleaning/importing data for one game
+Function.py: function for analyzing 5 person lineups.
+Function Less than 5.py: function for analyzing all 1-4 person lineups.
