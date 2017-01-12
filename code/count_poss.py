@@ -1,7 +1,6 @@
 import openpyxl, os, numpy
 import pandas as pd
 
-
 os.chdir('../pbp_files')
 
 pd.set_option('expand_frame_repr', False)
@@ -13,8 +12,11 @@ op_pos_l = ['TURNOVR', 'GOOD!', 'FOUL']
 
 files = [ f for f in os.listdir( os.curdir ) if os.path.isfile(f) ]
 
+poss_by_game = {}
+
 for file in files:
     if '.xlsx' in file and 'lock' not in file:
+
         print file
         wb = openpyxl.load_workbook(file)
 
@@ -50,25 +52,24 @@ for file in files:
 
                 if len(stanford_row) == stanford_row.count(None):
 
+
                     #if opponents committed a foul, turnover, or scored a point then stanford ends defensive possession
-                    if [i for e in op_pos_l for i in opponent_row if e in i]:
+                    if [i for e in op_pos_l for i in opponent_row if (isinstance(i, unicode) or isinstance(i, str))and e in i]:
 
                         rows.append([0,1,time, currentperiod])
 
                 else:
 
                     #check if end to offensive posession:
-
-                    if [i for e in off_pos_l for i in stanford_row if i is not None and e in i]:
+                    if [i for e in off_pos_l for i in stanford_row if (isinstance(i, unicode) or isinstance(i, str)) and e in i]:
 
                         rows.append([1,0,time, currentperiod])
-
 
                     #If There's a turnovr on the opponent's cell for a steal, if not, then we don't count it
                     else:
 
+                        def_pos = [i for e in def_pos_l for i in stanford_row if (isinstance(i, unicode) or isinstance(i, str)) and e in i]
 
-                        def_pos = [i for e in def_pos_l for i in stanford_row if i is not None and e in i]
                         if def_pos:
                             if ['STEAL' for i in def_pos if 'STEAL' in i]: #account for the edge case where a turnover and steal is not recorded within on the same clock
                                 if opponent_row.count(None) >0:
@@ -81,4 +82,4 @@ for file in files:
 
         total_df = pd.DataFrame(rows, columns = h)
         total_df = total_df.sort(['period', 'time'], ascending=[1, 0])
-        print total_df
+        total_df.to_csv('../possession_tables/' + file.split('.xlsx')[0] + "_possession_table.csv", )
